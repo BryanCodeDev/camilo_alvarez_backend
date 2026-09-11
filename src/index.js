@@ -5,6 +5,7 @@ import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import rateLimit from 'express-rate-limit'
 import { connectDB, ensureDatabase } from './config/database.js'
+import { runMigrations } from './utils/migrate.js'
 import authRoutes from './routes/auth.js'
 import productRoutes from './routes/products.js'
 import categoryRoutes from './routes/categories.js'
@@ -64,6 +65,7 @@ app.use(errorHandler)
 async function start() {
   try {
     await ensureDatabase()
+    await runMigrations()
     await connectDB()
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`)
