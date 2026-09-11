@@ -1,3 +1,36 @@
+export function mapProduct(p) {
+  if (!p) return null
+  return {
+    ...p,
+    id: p.id,
+    category_id: p.category_id,
+    category: p.category_name || p.category,
+    categorySlug: p.category_slug,
+    brand: p.brand_name || p.brand,
+    brandId: p.brand_id,
+    name: p.name,
+    slug: p.slug,
+    sku: p.sku,
+    shortDescription: p.short_description,
+    description: p.description,
+    price: p.price,
+    originalPrice: p.original_price,
+    discountPercent: p.discount_percent,
+    costPrice: p.cost_price,
+    stock: p.stock,
+    minStock: p.min_stock,
+    isActive: p.is_active,
+    isFeatured: p.is_featured,
+    isNew: p.is_new,
+    isOnSale: p.is_on_sale,
+    discount: p.original_price && p.price < p.original_price
+      ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
+      : 0,
+    mainImage: p.main_image,
+    images: p.images || [],
+  }
+}
+
 export function formatPrice(price, currency = 'ARS', locale = 'es-AR') {
   if (price === null || price === undefined) return '$0'
   return new Intl.NumberFormat(locale, {

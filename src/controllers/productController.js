@@ -1,6 +1,7 @@
 import { query, queryOne, transaction } from '../config/database.js'
 import slugify from 'slugify'
 import { validationResult } from 'express-validator'
+import { mapProduct } from '../utils/helpers.js'
 
 function generateSlug(name) {
   return slugify(name, { lower: true, strict: true })
@@ -109,11 +110,8 @@ export async function getProducts(req, res) {
     const productsWithImages = await Promise.all(products.map(async (p) => {
       const images = await query('SELECT id, url, alt_text, is_main, sort_order FROM product_images WHERE product_id = ? ORDER BY is_main DESC, sort_order', [p.id])
       return {
-        ...p,
+        ...mapProduct(p),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: p.original_price && p.price < p.original_price
-          ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-          : 0,
       }
     }))
 
@@ -167,18 +165,10 @@ export async function getProductBySlug(req, res) {
 
     res.json({
       product: {
-        ...product,
+        ...mapProduct(product),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: product.original_price && product.price < product.original_price
-          ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-          : 0,
       },
-      related: related.map(p => ({
-        ...p,
-        discount: p.original_price && p.price < p.original_price
-          ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-          : 0,
-      })),
+      related: related.map(p => mapProduct(p)),
     })
   } catch (error) {
     console.error('Get product error:', error)
@@ -208,11 +198,8 @@ export async function getProductById(req, res) {
 
     res.json({
       product: {
-        ...product,
+        ...mapProduct(product),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: product.original_price && product.price < product.original_price
-          ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-          : 0,
       },
     })
   } catch (error) {
@@ -238,11 +225,8 @@ export async function getFeaturedProducts(req, res) {
     const productsWithImages = await Promise.all(products.map(async (p) => {
       const images = await query('SELECT id, url, alt_text, is_main, sort_order FROM product_images WHERE product_id = ? ORDER BY is_main DESC, sort_order', [p.id])
       return {
-        ...p,
+        ...mapProduct(p),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: p.original_price && p.price < p.original_price
-          ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-          : 0,
       }
     }))
 
@@ -271,9 +255,8 @@ export async function getOnSaleProducts(req, res) {
     const productsWithImages = await Promise.all(products.map(async (p) => {
       const images = await query('SELECT id, url, alt_text, is_main, sort_order FROM product_images WHERE product_id = ? ORDER BY is_main DESC, sort_order', [p.id])
       return {
-        ...p,
+        ...mapProduct(p),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: p.discount_percent,
       }
     }))
 
@@ -301,12 +284,9 @@ export async function getNewArrivals(req, res) {
     const productsWithImages = await Promise.all(products.map(async (p) => {
       const images = await query('SELECT id, url, alt_text, is_main, sort_order FROM product_images WHERE product_id = ? ORDER BY is_main DESC, sort_order', [p.id])
       return {
-        ...p,
+        ...mapProduct(p),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: p.original_price && p.price < p.original_price
-          ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-          : 0,
-      }
+              }
     }))
 
     res.json({ products: productsWithImages })
@@ -355,12 +335,9 @@ export async function getRelatedProducts(req, res) {
     const productsWithImages = await Promise.all(related.map(async (p) => {
       const images = await query('SELECT id, url, alt_text, is_main, sort_order FROM product_images WHERE product_id = ? ORDER BY is_main DESC, sort_order', [p.id])
       return {
-        ...p,
+        ...mapProduct(p),
         images: images.map(img => ({ id: img.id, url: img.url, alt: img.alt_text, isMain: img.is_main, sortOrder: img.sort_order })),
-        discount: p.original_price && p.price < p.original_price
-          ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-          : 0,
-      }
+              }
     }))
 
     res.json({ products: productsWithImages })
