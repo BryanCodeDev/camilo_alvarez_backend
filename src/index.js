@@ -17,6 +17,7 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 
 const app = express()
+app.set('trust proxy', true)
 const PORT = process.env.PORT || 3001
 
 app.use(helmet({
