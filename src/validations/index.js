@@ -13,7 +13,7 @@ export const registerValidation = [
   body('lastName').trim().notEmpty().withMessage('Apellido es requerido').isLength({ max: 100 }),
   body('email').isEmail().withMessage('Email inválido').normalizeEmail(),
   body('password').isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
-  body('phone').optional().trim().isMobilePhone('es-AR').withMessage('Teléfono inválido'),
+  body('phone').optional().trim().isMobilePhone('es-CO').withMessage('Teléfono inválido'),
   validate,
 ]
 
@@ -26,7 +26,7 @@ export const loginValidation = [
 export const updateProfileValidation = [
   body('firstName').optional().trim().notEmpty().isLength({ max: 100 }),
   body('lastName').optional().trim().notEmpty().isLength({ max: 100 }),
-  body('phone').optional().trim().isMobilePhone('es-AR').withMessage('Teléfono inválido'),
+  body('phone').optional().trim().isMobilePhone('es-CO').withMessage('Teléfono inválido'),
   body('address').optional().trim().isLength({ max: 500 }),
   body('city').optional().trim().isLength({ max: 100 }),
   body('province').optional().trim().isLength({ max: 100 }),

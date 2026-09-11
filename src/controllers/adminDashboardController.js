@@ -60,7 +60,7 @@ export async function getSalesChart(req, res) {
       const date = new Date()
       date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split('T')[0]
-      labels.push(date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }))
+      labels.push(date.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit' }))
 
       const found = sales.find(s => s.date === dateStr)
       data.push(parseFloat(found?.total || 0))
@@ -99,7 +99,7 @@ export async function getOrdersChart(req, res) {
       const date = new Date()
       date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split('T')[0]
-      labels.push(date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }))
+      labels.push(date.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit' }))
 
       const found = orders.find(o => o.date === dateStr)
       total.push(found?.total || 0)
