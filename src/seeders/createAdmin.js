@@ -1,0 +1,36 @@
+import bcrypt from 'bcryptjs'
+import { query, queryOne, transaction } from '../config/database.js'
+
+async function createAdmin() {
+  const email = process.env.ADMIN_EMAIL || 'admin@techstore.com'
+  const password = process.env.ADMIN_PASSWORD || 'TechStore2024!'
+  const firstName = process.env.ADMIN_FIRST_NAME || 'Admin'
+  const lastName = process.env.ADMIN_LAST_NAME || 'TechStore'
+
+  try {
+    const existing = await queryOne('SELECT id FROM users WHERE email = ?', [email])
+    if (existing) {
+      console.log('⚠️  Admin user already exists')
+      return
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12)
+
+    await transaction(async (conn) => {
+      await conn.execute(
+        `INSERT INTO users (first_name, last_name, email, password_hash, role_id, is_active, email_verified)
+         VALUES (?, ?, ?, ?, 1, TRUE, TRUE)`,
+        [firstName, lastName, email, passwordHash]
+      )
+    })
+
+    console.log('✅ Admin user created successfully')
+    console.log(`   Email: ${email}`)
+    console.log(`   Password: ${password}`)
+  } catch (error) {
+    console.error('❌ Error creating admin:', error.message)
+    throw error
+  }
+}
+
+createAdmin().then(() => process.exit(0)).catch(() => process.exit(1))
