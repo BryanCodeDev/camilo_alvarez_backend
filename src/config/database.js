@@ -15,6 +15,28 @@ const pool = mysql.createPool({
   charset: 'utf8mb4',
 })
 
+export async function ensureDatabase() {
+  const dbName = process.env.DB_NAME || 'techstore'
+  const conn = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    charset: 'utf8mb4',
+  })
+
+  try {
+    await conn.query(
+      `CREATE DATABASE IF NOT EXISTS \`${dbName.replace(/`/g, '``')}\`
+       CHARACTER SET utf8mb4
+       COLLATE utf8mb4_unicode_ci`
+    )
+    console.log(`✅ Database "${dbName}" is ready.`)
+  } finally {
+    await conn.end()
+  }
+}
+
 export async function connectDB() {
   try {
     const connection = await pool.getConnection()
@@ -22,6 +44,11 @@ export async function connectDB() {
     connection.release()
     return pool
   } catch (error) {
+    if (error.code === 'ER_BAD_DB_ERROR') {
+      console.error('❌ Database does not exist. Running ensureDatabase()...')
+      await ensureDatabase()
+      console.log('✅ Database created. Please restart the server.')
+    }
     console.error('❌ MySQL connection failed:', error.message)
     throw error
   }

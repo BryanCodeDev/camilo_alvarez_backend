@@ -4,7 +4,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import rateLimit from 'express-rate-limit'
-import { connectDB } from './config/database.js'
+import { connectDB, ensureDatabase } from './config/database.js'
 import authRoutes from './routes/auth.js'
 import productRoutes from './routes/products.js'
 import categoryRoutes from './routes/categories.js'
@@ -62,6 +62,7 @@ app.use(errorHandler)
 
 async function start() {
   try {
+    await ensureDatabase()
     await connectDB()
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`)
