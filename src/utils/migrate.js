@@ -1,4 +1,6 @@
 import { query } from '../config/database.js'
+import fs from 'fs'
+import path from 'path'
 
 const migrations = [
   `CREATE TABLE IF NOT EXISTS roles (
@@ -305,6 +307,23 @@ const migrations = [
   ('maintenance_mode', 'false', 'Modo mantenimiento');`,
 ]
 
+function splitSqlStatements(sql) {
+  return sql
+    .split(/;\s*(?:\r?\n|$)/)
+    .map((statement) =>
+      statement
+        .replace(/^--.*$/gm, '')
+        .trim()
+    )
+    .filter((statement) => {
+      if (!statement) return false
+      const upper = statement.toUpperCase()
+      if (upper.startsWith('CREATE DATABASE')) return false
+      if (upper.startsWith('USE ')) return false
+      return true
+    })
+}
+
 export async function runMigrations() {
   console.log('🔄 Running migrations...')
   for (let i = 0; i < migrations.length; i++) {
@@ -317,6 +336,69 @@ export async function runMigrations() {
     }
   }
   console.log('✅ All migrations completed')
+}
+
+export async function runSeed() {
+  console.log('🌱 Running seed...')
+
+  const seedPath = path.resolve(process.cwd(), 'seed.sql')
+
+  if (!fs.existsSync(seedPath)) {
+    console.log('⚠️  seed.sql not found, skipping seed')
+    return 0
+  }
+
+  const raw = fs.readFileSync(seedPath, 'utf8')
+  const statements = splitSqlStatements(raw)
+
+  console.log(`🌱 seed.sql: ${statements.length} statements found`)
+
+  const { createConnection } = await import('mysql2/promise')
+  const conn = await createConnection({
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    charset: 'utf8mb4',
+    multipleStatements: true,
+  })
+
+  try {
+    let applied = 0
+
+    for (const statement of statements) {
+      const head = statement.slice(0, 100).replace(/\s+/g, ' ')
+
+      try {
+        await conn.query(statement)
+        applied += 1
+        console.log(`  ✓ ${head}${statement.length > 100 ? '...' : ''}`)
+      } catch (error) {
+        const benign =
+          error.code === 'ER_TABLE_EXISTS_ERROR' ||
+          error.code === 'ER_DUP_KEYNAME' ||
+          error.code === 'ER_DUP_ENTRY' ||
+          error.code === 'ER_FK_DUP_NAME' ||
+          error.code === 'ER_ROW_IS_REFERENCED_2' ||
+          error.code === 'ER_NO_REFERENCED_ROW_2'
+
+        if (benign) {
+          applied += 1
+          console.log(`  ~ ${head} (skipped: ${error.code})`)
+          continue
+        }
+
+        console.error(`  ✗ ${head} → ${error.code || error.message}`)
+        throw error
+      }
+    }
+
+    console.log(`🌱 Seed completed: ${applied} statements applied`)
+    return applied
+  } finally {
+    await conn.end()
+  }
 }
 
 async function main() {

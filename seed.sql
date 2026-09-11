@@ -9,6 +9,12 @@ DELETE FROM `product_images` WHERE `product_id` IN (
 
 DELETE FROM `products` WHERE `sku` LIKE 'SEED-%';
 
+-- Insert test users (1 per role, password: Admin1012@)
+INSERT IGNORE INTO `users` (`first_name`, `last_name`, `email`, `password_hash`, `role_id`, `is_active`, `email_verified`) VALUES
+('Admin', 'TechStore', 'admin@techstore.com', '$2a$12$kzlsqHY/QgEcOxqnX22zv.P1h.oRrupoNzW.2jBDdUfy5lAu1nRyi', 1, TRUE, TRUE),
+('User', 'Test', 'user@techstore.com', '$2a$12$kzlsqHY/QgEcOxqnX22zv.P1h.oRrupoNzW.2jBDdUfy5lAu1nRyi', 2, TRUE, TRUE),
+('Guest', 'Test', 'guest@techstore.com', '$2a$12$kzlsqHY/QgEcOxqnX22zv.P1h.oRrupoNzW.2jBDdUfy5lAu1nRyi', 3, TRUE, FALSE);
+
 -- Insert seed products (no hardcoded IDs - let AUTO_INCREMENT handle it)
 INSERT INTO `products` (
   `category_id`, `brand_id`, `name`, `slug`, `sku`, `short_description`, `description`,
