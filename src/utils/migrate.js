@@ -319,16 +319,10 @@ export async function runMigrations() {
   console.log('✅ All migrations completed')
 }
 
-export async function seedDemoData() {
-  console.log('🌱 Seeding demo data...')
-  // Demo products would be inserted here
-  console.log('✅ Demo data seeded')
-}
-
 async function main() {
   try {
     await runMigrations()
-    await seedDemoData()
+    console.log('✅ Migrations completed. Run "npm run seed:admin" to create admin user.')
     process.exit(0)
   } catch (error) {
     console.error('Migration failed:', error)
