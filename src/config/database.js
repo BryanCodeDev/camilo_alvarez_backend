@@ -16,7 +16,7 @@ const pool = mysql.createPool({
 })
 
 export async function ensureDatabase() {
-  const dbName = process.env.DB_NAME || 'techstore'
+  const dbName = process.env.DB_NAME || 'railway'
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
