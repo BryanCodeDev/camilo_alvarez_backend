@@ -45,7 +45,7 @@ INSERT INTO `products` (
  '<p>Cargador veicular USB-C con carga rápida de 35W, doble puerto y diseño compacto para tu auto.</p>',
  JSON_OBJECT('Potencia', '35W', 'Puertos', '2x USB-C', 'Compatibilidad', 'Android/iPhone', 'Entrada', '12-24V'),
  JSON_ARRAY('Carga rápida 35W', 'Doble puerto', 'Compacto', 'Protección contra sobrecarga', 'Cable USB-C incluido'),
- '12 meses', 8900, 14900, 40, 3500, 45, 0.08, '12 x 6 x 4 cm',
+  '12 meses', 8900, 14900, 40, 3500, 45, 3, 0.08, '12 x 6 x 4 cm',
  TRUE, FALSE, FALSE, TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  'Cargadores Vehiculares', 'Cargador veicular USB-C de carga rápida para autos.'),
 
@@ -54,7 +54,7 @@ INSERT INTO `products` (
  '<p>Power Bank de 20000mAh con carga rápida de 45W, doble puerto USB-C y pantalla de carga.</p>',
  JSON_OBJECT('Capacidad', '20000mAh', 'Potencia', '45W', 'Puertos', '2x USB-C, 1x USB-A', 'Batería', 'Li-ion'),
  JSON_ARRAY('Carga rápida 45W', '20000mAh', 'Doble USB-C', 'Pantalla LED', 'Carga passthrough'),
- '12 meses', 12900, 19900, 35, 8500, 60, 0.35, '15 x 7 x 2 cm',
+  '12 meses', 12900, 19900, 35, 8500, 60, 3, 0.35, '15 x 7 x 2 cm',
  TRUE, TRUE, FALSE, TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  'Cargadores Portátiles', 'Power Bank de 20000mAh con carga rápida.'),
 
@@ -63,7 +63,7 @@ INSERT INTO `products` (
  '<p>Soporte magnético universal con agarre fuerte, rotación 360° y compatible con carga inalámbrica.</p>',
  JSON_OBJECT('Material', 'Aluminio', 'Montaje', 'Ventosa/air vent', 'Rotación', '360°', 'Imán', 'Neodimio'),
  JSON_ARRAY('Magnético', '360° rotación', 'Universal', 'Carga inalámbrica', 'Ventosa y clip'),
- '12 meses', 3200, 5900, 45, 1200, 80, 0.04, '10 x 8 x 12 cm',
+  '12 meses', 3200, 5900, 45, 1200, 80, 3, 0.04, '10 x 8 x 12 cm',
  TRUE, FALSE, FALSE, TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  'Soportes Para Celulares', 'Soporte magnético universal para celulares.'),
 
@@ -72,7 +72,7 @@ INSERT INTO `products` (
  '<p>Adaptador multipuerto USB-C con HDMI, USB-A, LAN y carga pass-through. Compatible con Mac y Windows.</p>',
  JSON_OBJECT('Puertos', 'HDMI + 2x USB-A + LAN + USB-C', 'Resolución', '4K@30Hz', 'Conectividad', 'Gigabit LAN', 'Compatibilidad', 'Mac/Windows'),
  JSON_ARRAY('4K HDMI', 'USB-A x2', 'Gigabit LAN', 'Carga pass-through', 'Compacto'),
- '12 meses', 4200, 7900, 47, 1800, 40, 0.06, '8 x 5 x 2 cm',
+  '12 meses', 4200, 7900, 47, 1800, 40, 3, 0.06, '8 x 5 x 2 cm',
  TRUE, FALSE, FALSE, TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  'Adaptadores', 'Adaptador multipuerto USB-C con HDMI, USB-A, LAN y carga pass-through.'),
 
@@ -81,7 +81,7 @@ INSERT INTO `products` (
  '<p>Estuche rígido protector para audífonos y earbuds, con compartimento para cables y cierre magnético.</p>',
  JSON_OBJECT('Material', 'Silicona rígida', 'Cierre', 'Magnético', 'Compartimentos', 'Principal + cables', 'Resistencia', 'Agua IPX4'),
  JSON_ARRAY('Rígido', 'Magnético', 'Cables', 'IPX4', 'Compacto'),
- '12 meses', 1500, 2900, 50, 800, 100, 0.02, '12 x 8 x 5 cm',
+  '12 meses', 1500, 2900, 50, 800, 100, 3, 0.02, '12 x 8 x 5 cm',
  TRUE, FALSE, FALSE, TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY),
  'Estuches Para Audifonos', 'Estuche protector para audífonos y earbuds.');
 
