@@ -299,7 +299,7 @@ const migrations = [
   `INSERT IGNORE INTO settings (\`key\`, value, description) VALUES
   ('site_name', '"TechStore"', 'Nombre del sitio'),
   ('site_url', '"https://techstore.com"', 'URL del sitio'),
-  ('whatsapp_number', '"573209088777"', 'Número de WhatsApp para pedidos'),
+  ('whatsapp_number', process.env.VITE_WHATSAPP_NUMBER || '', 'Número de WhatsApp para pedidos'),
   ('free_shipping_threshold', '100000', 'Monto mínimo para envío gratis'),
   ('default_currency', '"ARS"', 'Moneda por defecto'),
   ('tax_rate', '0.21', 'Tasa de impuesto (21% IVA)'),
