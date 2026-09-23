@@ -11,56 +11,120 @@ export async function createOrder(req, res) {
   }
 
   try {
-    const { customerName, customerEmail, customerPhone, address, city, province, notes, items, paymentMethod, subtotal, discount, total } = req.body
+    const { customerName, customerEmail, customerPhone, address, city, province, notes, items, paymentMethod } = req.body
     const userId = req.user?.id || null
-
     const orderNumber = generateOrderNumber()
 
     const orderId = await transaction(async (conn) => {
-      const [orderResult] = await conn.execute(
-        `INSERT INTO orders (
-          user_id, order_number, status, payment_status, payment_method,
-          subtotal, discount, shipping_cost, total, currency,
-          customer_name, customer_email, customer_phone, address, city, province, notes
-        ) VALUES (?, ?, 'pending', 'pending', ?, ?, ?, 0, ?, 'ARS', ?, ?, ?, ?, ?, ?, ?)`,
-        [userId, orderNumber, paymentMethod, subtotal, discount, total, customerName, customerEmail, customerPhone, address, city, province, notes || null]
-      )
-
-      const orderId = orderResult.insertId
+      let subtotal = 0
+      let discount = 0
 
       for (const item of items) {
-        const product = await conn.execute('SELECT name, price, original_price, sku, slug FROM products WHERE id = ? AND deleted_at IS NULL', [item.productId])
-        const prod = product[0][0]
-        if (!prod) {
+        const quantity = Number(item.quantity)
+        const [productRows] = await conn.execute(
+          `SELECT id, name, price, original_price, sku, slug, stock
+           FROM products
+           WHERE id = ? AND deleted_at IS NULL
+           FOR UPDATE`,
+          [item.productId]
+        )
+        const product = productRows[0]
+
+        if (!product) {
           throw new Error(`Producto ${item.productId} no encontrado`)
         }
 
-        const unitPrice = item.price || prod.price
-        const discountPrice = prod.original_price && prod.price < prod.original_price ? prod.price : null
-        const itemSubtotal = unitPrice * item.quantity
+        if (!Number.isInteger(quantity) || quantity < 1) {
+          throw new Error(`Cantidad inválida para el producto ${item.productId}`)
+        }
+
+        if (product.stock < quantity) {
+          const error = new Error(`Stock insuficiente para ${product.name}`)
+          error.code = 'STOCK_INSUFFICIENT'
+          throw error
+        }
+
+        const unitPrice = Math.round(Number(product.price) * 100) / 100
+        const originalPrice = Math.round(Number(product.original_price || 0) * 100) / 100
+        const lineDiscount = originalPrice > unitPrice ? originalPrice - unitPrice : 0
+        const itemSubtotal = Math.round(unitPrice * quantity * 100) / 100
+
+        subtotal = Math.round((subtotal + itemSubtotal) * 100) / 100
+        discount = Math.round((discount + lineDiscount * quantity) * 100) / 100
 
         await conn.execute(
           `INSERT INTO order_items (order_id, product_id, product_name, product_sku, product_slug, quantity, unit_price, discount_price, subtotal)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [orderId, item.productId, prod.name, prod.sku, prod.slug, item.quantity, unitPrice, discountPrice, itemSubtotal]
+          [
+            0,
+            product.id,
+            product.name,
+            product.sku,
+            product.slug,
+            quantity,
+            unitPrice,
+            lineDiscount > 0 ? unitPrice : null,
+            itemSubtotal,
+          ]
         )
 
-        await conn.execute('UPDATE products SET stock = stock - ? WHERE id = ?', [item.quantity, item.productId])
+        await conn.execute('UPDATE products SET stock = stock - ? WHERE id = ?', [quantity, product.id])
+      }
+
+      const total = subtotal
+      const [orderResult] = await conn.execute(
+        `INSERT INTO orders (
+          user_id, order_number, status, payment_status, payment_method,
+          subtotal, discount, shipping_cost, total, currency, external_reference,
+          customer_name, customer_email, customer_phone, address, city, province, notes
+        ) VALUES (?, ?, 'pending', 'pending', ?, ?, ?, 0, ?, 'COP', ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          userId,
+          orderNumber,
+          paymentMethod,
+          subtotal,
+          discount,
+          total,
+          orderNumber,
+          customerName,
+          customerEmail,
+          customerPhone,
+          address,
+          city,
+          province,
+          notes || null,
+        ]
+      )
+
+      const createdOrderId = orderResult.insertId
+
+      for (const item of items) {
+        await conn.execute(
+          `UPDATE order_items SET order_id = ?
+           WHERE order_id = 0
+             AND product_id = ?
+             AND product_sku = ?
+           LIMIT 1`,
+          [createdOrderId, item.productId, item.sku]
+        )
       }
 
       await conn.execute(
         `INSERT INTO order_status_history (order_id, status, previous_status, changed_by, notes)
          VALUES (?, 'pending', NULL, ?, 'Pedido creado')`,
-        [orderId, userId]
+        [createdOrderId, userId]
       )
 
-      return orderId
+      return createdOrderId
     })
 
     const order = await getOrderById(orderId, userId)
     res.status(201).json({ order })
   } catch (error) {
     console.error('Create order error:', error)
+    if (error.code === 'STOCK_INSUFFICIENT') {
+      return res.status(409).json({ error: error.message })
+    }
     res.status(500).json({ error: error.message || 'Error al crear pedido' })
   }
 }
