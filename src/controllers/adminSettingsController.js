@@ -6,7 +6,7 @@ export async function getSettings(req, res) {
     const settings = await query('SELECT `key`, value, description FROM settings')
     const settingsObj = {}
     settings.forEach(s => {
-      settingsObj[s.key] = JSON.parse(s.value)
+      settingsObj[s.key] = s.value
     })
     res.json({ settings: settingsObj })
   } catch (error) {
